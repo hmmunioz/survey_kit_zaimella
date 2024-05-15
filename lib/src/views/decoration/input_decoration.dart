@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 InputDecoration textFieldInputDecoration({String hint = ''}) => InputDecoration(
       labelStyle: TextStyle(color: Color.fromRGBO(2, 52, 22, 1)),
