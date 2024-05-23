@@ -11,7 +11,7 @@ class ConditionalNavigationRule implements NavigationRule {
     return ConditionalNavigationRule(
       resultToStepIdentifierMapper: (input) {
         for (final MapEntry entry in inputValues.entries) {
-          if (entry.key != input) {
+          if (entry.key == input) {
             return StepIdentifier(id: entry.value);
           }
         }
