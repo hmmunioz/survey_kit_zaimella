@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:survey_kit/src/answer_format/double_answer_format.dart';
 import 'package:survey_kit/src/constants/colors.dart';
 import 'package:survey_kit/src/result/question/double_question_result.dart';
@@ -30,8 +31,7 @@ class _DoubleAnswerViewState extends State<DoubleAnswerView> {
   @override
   void initState() {
     super.initState();
-    _doubleAnswerFormat =
-        widget.questionStep.answerFormat as DoubleAnswerFormat;
+    _doubleAnswerFormat = widget.questionStep.answerFormat as DoubleAnswerFormat;
     _controller = TextEditingController();
     _controller.text = widget.result?.result?.toString() ?? '';
     _checkValidation(_controller.text);
@@ -46,7 +46,7 @@ class _DoubleAnswerViewState extends State<DoubleAnswerView> {
 
   void _checkValidation(String text) {
     setState(() {
-      _isValid = text.isNotEmpty && double.tryParse(text) != null;
+      _isValid = text.isNotEmpty && double.tryParse(text.replaceAll(",", ".")) != null;
     });
   }
 
@@ -60,9 +60,7 @@ class _DoubleAnswerViewState extends State<DoubleAnswerView> {
         startDate: _startDate,
         endDate: DateTime.now(),
         valueIdentifier: _controller.text,
-        result: double.tryParse(_controller.text) ??
-            _doubleAnswerFormat.defaultValue ??
-            null,
+        result: double.tryParse(_controller.text) ?? _doubleAnswerFormat.defaultValue ?? null,
       ),
       isValid: _isValid || widget.questionStep.isOptional,
       title: widget.questionStep.title.isNotEmpty
@@ -83,9 +81,30 @@ class _DoubleAnswerViewState extends State<DoubleAnswerView> {
             margin: EdgeInsets.symmetric(horizontal: 10),
             width: MediaQuery.of(context).size.width,
             child: TextField(
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*[.]?\d*$')),
+                TextInputFormatter.withFunction((oldValue, newValue) {
+                  String sanitizedText = newValue.text.replaceAll(',', '.');
+                  if (sanitizedText.isEmpty) {
+                    return newValue;
+                  }
+                  if (sanitizedText == '.' || sanitizedText == '0.') {
+                    return newValue.copyWith(text: '0.');
+                  }
+                  if (sanitizedText.split('.').length > 2) {
+                    return oldValue;
+                  }
+
+                  return newValue.copyWith(text: sanitizedText);
+                }),
+              ],
+              textInputAction: TextInputAction.next,
               autofocus: true,
               decoration: textFieldInputDecoration(
                 hint: _doubleAnswerFormat.hint,
+              ),
+              style: TextStyle(
+                color: Color.fromRGBO(2, 52, 22, 1),
               ),
               controller: _controller,
               onChanged: (String value) {

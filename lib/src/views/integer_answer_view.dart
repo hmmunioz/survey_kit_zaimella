@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:survey_kit/src/answer_format/integer_answer_format.dart';
 import 'package:survey_kit/src/constants/colors.dart';
 import 'package:survey_kit/src/result/question/integer_question_result.dart';
@@ -30,8 +31,7 @@ class _IntegerAnswerViewState extends State<IntegerAnswerView> {
   @override
   void initState() {
     super.initState();
-    _integerAnswerFormat =
-        widget.questionStep.answerFormat as IntegerAnswerFormat;
+    _integerAnswerFormat = widget.questionStep.answerFormat as IntegerAnswerFormat;
     _controller = TextEditingController();
     _controller.text = widget.result?.result?.toString() ?? '';
     _checkValidation(_controller.text);
@@ -60,9 +60,7 @@ class _IntegerAnswerViewState extends State<IntegerAnswerView> {
               startDate: _startDate,
               endDate: DateTime.now(),
               valueIdentifier: _controller.text,
-              result: int.tryParse(_controller.text) ??
-                  _integerAnswerFormat.defaultValue ??
-                  null,
+              result: int.tryParse(_controller.text) ?? _integerAnswerFormat.defaultValue ?? null,
             ),
         isValid: _isValid || widget.questionStep.isOptional,
         title: widget.questionStep.title.isNotEmpty
@@ -82,6 +80,9 @@ class _IntegerAnswerViewState extends State<IntegerAnswerView> {
                 color: ColorsTheme.mobilmellaTextWhite,
                 width: MediaQuery.of(context).size.width,
                 child: TextField(
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*[.]?\d*$')),
+                  ],
                   textInputAction: TextInputAction.next,
                   autofocus: true,
                   style: TextStyle(
